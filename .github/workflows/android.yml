@@ -51,6 +51,30 @@ jobs:
             done
           } >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Rincian isi APK
+        working-directory: android/app/build/outputs/apk/release
+        run: |
+          python3 - <<'PY'
+          import glob
+          import zipfile
+          from collections import defaultdict
+
+          for apk in sorted(glob.glob('*.apk')):
+              with zipfile.ZipFile(apk) as z:
+                  infos = z.infolist()
+              total = sum(i.file_size for i in infos)
+              print(f'\n== {apk}: {total / 1048576:.1f} MB isi, {len(infos)} berkas')
+              for i in sorted(infos, key=lambda i: i.file_size, reverse=True)[:15]:
+                  print(f'{i.file_size / 1048576:7.2f} MB  {i.filename}')
+              groups = defaultdict(int)
+              for i in infos:
+                  key = '/'.join(i.filename.split('/')[:2]) if '/' in i.filename else i.filename
+                  groups[key] += i.file_size
+              print('-- per folder:')
+              for key, size in sorted(groups.items(), key=lambda kv: kv[1], reverse=True)[:12]:
+                  print(f'{size / 1048576:7.2f} MB  {key}')
+          PY
+
       - name: Unggah APK
         uses: actions/upload-artifact@v4
         with:
