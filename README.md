@@ -71,12 +71,22 @@ release sekarang memakai:
 - `reactNativeArchitectures=armeabi-v7a,arm64-v8a` di `android/gradle.properties`,
   jadi `x86`/`x86_64` (khusus emulator) tidak ikut;
 - R8 dan resource shrinking aktif untuk release;
-- ABI split dengan `universalApk true`, sehingga artifact berisi APK terpisah
-  per arsitektur plus satu APK universal.
+- ABI split tanpa APK universal, sehingga hasilnya dua berkas terpisah.
 
-Untuk HP modern, pilih APK `arm64-v8a` karena paling kecil. APK universal hanya
-untuk cadangan kalau arsitektur HP tidak diketahui. Angka pasti baru diketahui
-setelah CI selesai; jangan menulis perkiraan sebagai hasil.
+Ukuran terukur di CI (15 November 2026, run #4):
+
+| APK | Isi tidak terkompresi | Berkas |
+|---|---|---|
+| `app-arm64-v8a-release.apk` | 26,9 MB | 25 MB |
+| `app-armeabi-v7a-release.apk` | 21,0 MB | 19 MB |
+
+Artifact CI sekarang dipisah: `qrgenapp-arm64-v8a` dan `qrgenapp-armeabi-v7a`.
+HP Android modern memakai yang **arm64-v8a**; `armeabi-v7a` hanya untuk HP lama.
+
+Penyusun terbesar APK arm64: library React Native 6,7 MB, ML Kit barcode
+(`libbarhopper_v3`) 4,7 MB, `classes.dex` 3,7 MB, Hermes 2,6 MB, bundle JS
+1,7 MB, model ML Kit 0,8 MB. Jadi batas bawah realistis tanpa kamera pemindai
+sekitar 20 MB; 25 MB adalah harga fitur pemindai.
 
 ## Yang sudah ada
 

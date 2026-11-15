@@ -473,7 +473,8 @@ Build CI:
 
 ```
 checkout -> setup-node 22 -> setup-java 21 -> npm ci
-         -> gradlew assembleDebug -> upload-artifact
+         -> lint -> test -> gradlew assembleRelease
+         -> catat ukuran APK -> upload dua artifact (arm64-v8a, armeabi-v7a)
 ```
 
 Catatan penting:
@@ -484,6 +485,8 @@ Catatan penting:
 - `assembleDebug` menghasilkan APK yang biasanya masih butuh Metro. Untuk APK
   yang bisa dibagikan tanpa Metro, build `assembleRelease` dengan signing debug,
   atau tambahkan langkah bundling JS eksplisit ke Gradle.
+- Ukuran terukur: `arm64-v8a` 25 MB, `armeabi-v7a` 19 MB. Jangan menulis
+  perkiraan yang lebih kecil dari itu. Rincian isi APK dicetak di log CI.
 
 ---
 
@@ -546,8 +549,8 @@ dan `npx tsc --noEmit` di mesin lokal. Belum satu pun diuji di APK.
 - [x] Simpan/bagikan PNG (kode selesai, belum diuji di HP)
 - [x] Riwayat lokal (kode selesai, belum diuji di HP)
 - [x] Layar scanner (kode selesai, belum diuji di HP)
-- [x] Workflow GitHub Actions (belum pernah jalan)
-- [x] Setelan ukuran APK: 2 ABI, R8, resource shrinking, ABI split (belum diukur)
+- [x] Workflow GitHub Actions (sudah jalan; build release sukses)
+- [x] Setelan ukuran APK: 2 ABI, R8, resource shrinking, ABI split (arm64 25 MB, v7a 19 MB, terukur di CI)
 - [ ] Uji di HP
 
 Jangan centang item yang belum diuji di APK.

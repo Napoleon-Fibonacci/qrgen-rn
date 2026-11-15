@@ -75,9 +75,16 @@ jobs:
                   print(f'{size / 1048576:7.2f} MB  {key}')
           PY
 
-      - name: Unggah APK
+      - name: Unggah APK arm64-v8a
         uses: actions/upload-artifact@v4
         with:
-          name: qrgenapp-release-apk
-          path: android/app/build/outputs/apk/release/*.apk
+          name: qrgenapp-arm64-v8a
+          path: android/app/build/outputs/apk/release/app-arm64-v8a-release.apk
+          if-no-files-found: error
+
+      - name: Unggah APK armeabi-v7a
+        uses: actions/upload-artifact@v4
+        with:
+          name: qrgenapp-armeabi-v7a
+          path: android/app/build/outputs/apk/release/app-armeabi-v7a-release.apk
           if-no-files-found: error

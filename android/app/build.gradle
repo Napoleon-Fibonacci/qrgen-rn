@@ -93,14 +93,15 @@ android {
             keyPassword 'android'
         }
     }
-    // APK terpisah per arsitektur CPU, plus satu APK universal.
-    // APK per arsitektur jauh lebih kecil dan tetap bisa dipasang langsung.
+    // APK terpisah per arsitektur CPU. APK universal sengaja tidak dibuat:
+    // ukurannya 80 MB karena tetap membawa library x86 dari AAR pihak ketiga,
+    // padahal tidak ada HP pengguna yang membutuhkannya.
     splits {
         abi {
             enable true
             reset()
             include "arm64-v8a", "armeabi-v7a"
-            universalApk true
+            universalApk false
         }
     }
     buildTypes {
