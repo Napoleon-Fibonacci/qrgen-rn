@@ -37,11 +37,15 @@ function App() {
 
 function AppContent() {
   const insets = useSafeAreaInsets();
-  const { width } = useWindowDimensions();
+  const { width: windowWidth } = useWindowDimensions();
+  const [contentWidth, setContentWidth] = useState(0);
   const [tab, setTab] = useState<Tab>('generate');
   const rise = useRise();
-  const wide = width >= wideBreakpoint;
-  const gutter = wide ? space.xxl : space.l;
+  // Breakpoint dihitung dari lebar isi, bukan lebar jendela. Di pratinjau web,
+  // isi dibatasi 460 px walau jendela browser jauh lebih lebar.
+  const measuredWidth = contentWidth || windowWidth;
+  const wide = measuredWidth >= wideBreakpoint;
+  const gutter = windowWidth >= wideBreakpoint ? space.xxl : space.l;
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top }]}>
@@ -52,30 +56,42 @@ function AppContent() {
         ]}
         keyboardShouldPersistTaps="handled"
       >
-        <Animated.View style={[styles.brand, rise]}>
-          <View style={styles.brandStrip} />
-          <View style={styles.brandRow}>
-            <View style={styles.brandMark}>
-              <View style={styles.markSquare} />
-              <View style={[styles.markSquare, styles.markSquareRight]} />
-              <View style={[styles.markSquare, styles.markSquareBottom]} />
+        <View
+          style={styles.content}
+          onLayout={(event) => setContentWidth(Math.round(event.nativeEvent.layout.width))}
+        >
+          <Animated.View style={[styles.brand, rise]}>
+            <View style={styles.brandStrip} />
+            <View style={styles.brandRow}>
+              <View style={styles.brandMark}>
+                <View style={styles.markSquare} />
+                <View style={[styles.markSquare, styles.markSquareRight]} />
+                <View style={[styles.markSquare, styles.markSquareBottom]} />
+              </View>
+              <View style={styles.brandText}>
+                <Text
+                  style={[type.appTitle, measuredWidth < 360 ? styles.appTitleNarrow : null]}
+                  numberOfLines={1}
+                >
+                  COST QR Generator
+                </Text>
+                <Text style={type.tagline}>
+                  Club of Science and Technology. Bikin QR buat link, WiFi, kontak, dan teks.
+                </Text>
+              </View>
             </View>
-            <View style={styles.brandText}>
-              <Text style={[type.appTitle, width < 360 ? styles.appTitleNarrow : null]} numberOfLines={1}>
-                COST QR Generator
-              </Text>
-              <Text style={type.tagline}>
-                Club of Science and Technology. Bikin QR buat link, WiFi, kontak, dan teks.
-              </Text>
+            <View style={styles.topnav}>
+              <NavButton label="Buat QR" active={tab === 'generate'} onPress={() => setTab('generate')} />
+              <NavButton label="Pindai" active={tab === 'scan'} onPress={() => setTab('scan')} />
             </View>
-          </View>
-          <View style={styles.topnav}>
-            <NavButton label="Buat QR" active={tab === 'generate'} onPress={() => setTab('generate')} />
-            <NavButton label="Pindai" active={tab === 'scan'} onPress={() => setTab('scan')} />
-          </View>
-        </Animated.View>
+          </Animated.View>
 
-        {tab === 'generate' ? <GenerateScreen wide={wide} /> : <ScanScreen wide={wide} />}
+          {tab === 'generate' ? (
+            <GenerateScreen wide={wide} contentWidth={measuredWidth} />
+          ) : (
+            <ScanScreen wide={wide} />
+          )}
+        </View>
       </ScrollView>
     </View>
   );
@@ -106,6 +122,9 @@ const styles = StyleSheet.create({
   },
   scroll: {
     flexGrow: 1,
+  },
+  content: {
+    width: '100%',
   },
   brand: {
     marginTop: space.xl,

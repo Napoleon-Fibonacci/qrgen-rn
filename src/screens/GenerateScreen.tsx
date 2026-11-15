@@ -5,7 +5,7 @@
  * Simpan/bagikan lewat react-native-share, riwayat lewat AsyncStorage.
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import Share from 'react-native-share';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -59,10 +59,11 @@ const ENC_OPTIONS: ReadonlyArray<{ value: WifiEnc; label: string }> = [
 
 export interface GenerateScreenProps {
   wide: boolean;
+  /** Lebar isi yang tersedia, sudah dikurangi padding layar. */
+  contentWidth: number;
 }
 
-export default function GenerateScreen({ wide }: GenerateScreenProps) {
-  const { width } = useWindowDimensions();
+export default function GenerateScreen({ wide, contentWidth }: GenerateScreenProps) {
   const [qrType, setQrType] = useState<QrType>('url');
   const [url, setUrl] = useState('');
   const [text, setText] = useState('');
@@ -159,7 +160,10 @@ export default function GenerateScreen({ wide }: GenerateScreenProps) {
   }, [addHistory, payload, qrType, showToast]);
 
   const previewSize = Math.round(
-    Math.min(qrPreview.max, Math.max(qrPreview.min, (wide ? width * 0.34 : width) - space.xxl * 4)),
+    Math.min(
+      qrPreview.max,
+      Math.max(qrPreview.min, (wide ? contentWidth * 0.34 : contentWidth) - space.xxl * 4),
+    ),
   );
 
   const contrast = contrastAgainstWhite(QR_COLOR);
