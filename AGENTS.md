@@ -513,6 +513,7 @@ Catatan penting:
 | 15 Nov 2026 | Package `com.qrgenapp` | Bisa dipasang berdampingan dengan APK Capacitor |
 | 15 Nov 2026 | Tambah `@react-native-clipboard/clipboard` | `Clipboard` bukan lagi bagian inti React Native |
 | 15 Nov 2026 | APK CI memakai `assembleRelease` dengan debug key | APK bisa dibagikan tanpa Metro |
+| 15 Nov 2026 | Pratinjau web lewat `react-native-web` + Vite di folder `web/` | Live preview tanpa emulator; kamera di-stub, bukan bukti APK |
 
 ---
 

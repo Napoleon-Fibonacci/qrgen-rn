@@ -27,6 +27,28 @@ npm run lint
 `npm test` dan `npm run lint` tidak butuh Android SDK, jadi bisa jalan di mesin
 mana pun.
 
+## Pratinjau web (live preview tanpa emulator)
+
+Alat ini untuk melihat UI sambil mengetik, bukan pengganti uji APK.
+
+```sh
+npm run web
+```
+
+Lalu buka `http://localhost:5173`. Di VSCode/Cursor: **Command Palette → Simple
+Browser: Show** dan isi URL itu, supaya preview menempel di panel sebelah kode.
+Fast Refresh aktif: setiap simpan berkas, layar langsung berubah.
+
+Batasannya:
+
+- `react-native` dijalankan lewat `react-native-web`, bukan mesin Android.
+- Kamera diganti stub bertuliskan "Kamera tidak tersedia di pratinjau web".
+- "Simpan PNG" menghasilkan SVG lewat data URI, bukan PNG dari Android.
+- Hasil build-nya tidak bisa dipakai sebagai bukti aplikasi Android berjalan.
+
+Isi folder `web/` hanya untuk pratinjau. Jangan mengimpor berkas dari sana di
+kode aplikasi.
+
 ## Build APK lewat GitHub Actions
 
 Workflow `.github/workflows/android.yml` menjalankan lint, unit test, lalu

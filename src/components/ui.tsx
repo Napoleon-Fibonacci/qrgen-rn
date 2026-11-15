@@ -6,6 +6,7 @@ import {
   AccessibilityInfo,
   Animated,
   Easing,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -23,28 +24,41 @@ export function useRise(distance = 14, duration = 550) {
 
   useEffect(() => {
     let alive = true;
-    AccessibilityInfo.isReduceMotionEnabled()
-      .then((reduce) => {
-        if (!alive) {
-          return;
-        }
-        if (reduce) {
-          progress.setValue(1);
-          return;
-        }
-        Animated.timing(progress, {
-          toValue: 1,
-          duration,
-          easing: Easing.bezier(0.16, 1, 0.3, 1),
-          useNativeDriver: true,
-        }).start();
-      })
-      .catch(() => progress.setValue(1));
+    // Jaring pengaman: kalau animasi tidak pernah berjalan (misalnya di
+    // pratinjau web), layar tetap muncul daripada tertinggal transparan.
+    const reveal = () => {
+      if (alive) {
+        progress.setValue(1);
+      }
+    };
+    const fallback = setTimeout(reveal, duration + 250);
+
+    const run = () => {
+      if (!alive) {
+        return;
+      }
+      Animated.timing(progress, {
+        toValue: 1,
+        duration,
+        easing: Easing.bezier(0.16, 1, 0.3, 1),
+        useNativeDriver: Platform.OS !== 'web',
+      }).start(reveal);
+    };
+
+    const motion = AccessibilityInfo.isReduceMotionEnabled;
+    if (typeof motion === 'function') {
+      Promise.resolve(motion())
+        .then((reduce) => (reduce ? reveal() : run()))
+        .catch(run);
+    } else {
+      run();
+    }
 
     return () => {
       alive = false;
+      clearTimeout(fallback);
     };
-  }, [duration, progress]);
+  }, [distance, duration, progress]);
 
   return {
     opacity: progress,
@@ -237,7 +251,7 @@ export function Toast({ message }: ToastProps) {
     Animated.timing(opacity, {
       toValue: message ? 1 : 0,
       duration: 180,
-      useNativeDriver: true,
+      useNativeDriver: Platform.OS !== 'web',
     }).start();
   }, [message, opacity]);
 
