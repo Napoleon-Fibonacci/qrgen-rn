@@ -37,6 +37,20 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleRelease --no-daemon
 
+      - name: Catat ukuran APK
+        working-directory: android/app/build/outputs/apk/release
+        run: |
+          ls -lh *.apk
+          {
+            echo "### Ukuran APK"
+            echo ""
+            echo "| Berkas | Ukuran |"
+            echo "|---|---|"
+            for f in *.apk; do
+              echo "| $f | $(du -h "$f" | cut -f1) |"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Unggah APK
         uses: actions/upload-artifact@v4
         with:
