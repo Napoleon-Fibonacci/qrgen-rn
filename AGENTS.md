@@ -192,13 +192,24 @@ Warna status scan (dari `scan.css`):
 | Tombol | Chakra Petch | 14 | 600 |
 | Tombol mini | Chakra Petch | 12.5 | 600 |
 
-Catatan penting: font di `../qrgen/assets/fonts/` berformat **woff2**. React Native
-tidak membaca woff2. Pilihan:
+Catatan font: berkas asli di `../qrgen/assets/fonts/` berformat **woff2**, dan React
+Native tidak membacanya. Font sudah dikonversi ke TTF memakai fontTools lokal:
 
-1. Sementara pakai font sistem (`sans-serif`, `sans-serif-medium`) dan jangan mengaku
-   sudah memakai font COST.
-2. Konversi ke TTF/OTF, taruh di `assets/fonts/`, daftarkan lewat `react-native.config.js`
-   (`assets: ['./assets/fonts']`), lalu jalankan `npx react-native-asset`.
+| Berkas TTF | Sumber woff2 | family RN |
+|---|---|---|
+| `ChakraPetch-Bold.ttf` | `chakra-petch-700.woff2` | `ChakraPetch-Bold` |
+| `ChakraPetch-SemiBold.ttf` | `chakra-petch-600.woff2` | `ChakraPetch-SemiBold` |
+| `AtkinsonHyperlegible-Regular.ttf` | `atkinson-hyperlegible-400.woff2` | `AtkinsonHyperlegible-Regular` |
+| `AtkinsonHyperlegible-Bold.ttf` | `atkinson-hyperlegible-700.woff2` | `AtkinsonHyperlegible-Bold` |
+
+Salinan ada di `assets/fonts/` (sumber), `android/app/src/main/assets/fonts/` (dipakai
+APK), dan `web/public/fonts/` (pratinjau web). `react-native.config.js` berisi
+`assets: ['./assets/fonts']`; kalau isi `assets/fonts` berubah, jalankan
+`npx react-native-asset` lalu salin ulang ke folder web.
+
+Bobot sudah menempel di masing-masing berkas, jadi gaya di `src/theme.ts` tidak
+memakai `fontWeight`. Menambahkan `fontWeight` akan memaksa Android memalsukan
+tebal huruf dan hasilnya tidak sama dengan desain.
 
 Jangan memakai font lain sebagai pengganti diam-diam.
 
@@ -267,8 +278,9 @@ Jangan memakai font lain sebagai pengganti diam-diam.
   `backgroundColor: paper`, `barStyle: 'dark-content'`.
 - **iOS**: bayangan pakai `shadow*`; `KeyboardAvoidingView` wajib untuk form;
   safe area atas/bawah dari `react-native-safe-area-context`.
-- **Font**: Android butuh asset TTF lewat `react-native-asset`; iOS butuh entri
-  `UIAppFonts` di `Info.plist`. Kalau belum, pakai font sistem dengan jujur.
+- **Font**: TTF sudah ada di `android/app/src/main/assets/fonts`; iOS belum punya
+  proyek, jadi entri `UIAppFonts` di `Info.plist` belum dibuat. Font web ada di
+  `web/public/fonts` dengan `@font-face` di `web/index.html`.
 - **Input**: `keyboardType` disesuaikan (`url`, `phone-pad`, `email-address`),
   `autoCapitalize="none"` untuk URL dan email.
 
@@ -514,6 +526,8 @@ Catatan penting:
 | 15 Nov 2026 | Tambah `@react-native-clipboard/clipboard` | `Clipboard` bukan lagi bagian inti React Native |
 | 15 Nov 2026 | APK CI memakai `assembleRelease` dengan debug key | APK bisa dibagikan tanpa Metro |
 | 15 Nov 2026 | Pratinjau web lewat `react-native-web` + Vite di folder `web/` | Live preview tanpa emulator; kamera di-stub, bukan bukti APK |
+| 15 Nov 2026 | Font COST dikonversi woff2 → TTF dengan fontTools lokal | RN tidak membaca woff2; tanpa unduhan baru |
+| 15 Nov 2026 | APK hanya 2 ABI, R8 + resource shrinking + ABI split | Buang x86/x86_64 yang hanya untuk emulator |
 
 ---
 
@@ -525,6 +539,7 @@ dan `npx tsc --noEmit` di mesin lokal. Belum satu pun diuji di APK.
 - [x] Scaffold React Native 0.88.1
 - [x] `npm install`
 - [x] Token visual di `src/theme.ts`
+- [x] Font COST dalam bentuk TTF, terpasang di Android dan pratinjau web
 - [x] Dependency QR, share, storage, clipboard, kamera
 - [x] Builder payload murni + unit test (`src/qr.ts`)
 - [x] Layar generator (kode selesai, belum diuji di HP)
@@ -532,6 +547,7 @@ dan `npx tsc --noEmit` di mesin lokal. Belum satu pun diuji di APK.
 - [x] Riwayat lokal (kode selesai, belum diuji di HP)
 - [x] Layar scanner (kode selesai, belum diuji di HP)
 - [x] Workflow GitHub Actions (belum pernah jalan)
+- [x] Setelan ukuran APK: 2 ABI, R8, resource shrinking, ABI split (belum diukur)
 - [ ] Uji di HP
 
 Jangan centang item yang belum diuji di APK.

@@ -63,6 +63,21 @@ dibagikan tanpa Metro.
 Karena memakai `android/app/debug.keystore` yang ikut di-commit, build baru bisa
 menimpa build lama tanpa uninstall. Jangan mengganti file itu.
 
+### Ukuran APK
+
+Angka 30 MB yang lama berasal dari APK debug dengan empat arsitektur CPU. Build
+release sekarang memakai:
+
+- `reactNativeArchitectures=armeabi-v7a,arm64-v8a` di `android/gradle.properties`,
+  jadi `x86`/`x86_64` (khusus emulator) tidak ikut;
+- R8 dan resource shrinking aktif untuk release;
+- ABI split dengan `universalApk true`, sehingga artifact berisi APK terpisah
+  per arsitektur plus satu APK universal.
+
+Untuk HP modern, pilih APK `arm64-v8a` karena paling kecil. APK universal hanya
+untuk cadangan kalau arsitektur HP tidak diketahui. Angka pasti baru diketahui
+setelah CI selesai; jangan menulis perkiraan sebagai hasil.
+
 ## Yang sudah ada
 
 - Token visual dari situs web (`src/theme.ts`).
@@ -73,8 +88,6 @@ menimpa build lama tanpa uninstall. Jangan mengganti file itu.
 
 ## Yang belum ada
 
-- Font Chakra Petch dan Atkinson Hyperlegible masih woff2. Sementara pakai font
-  sistem; lihat `AGENTS.md` bagian 7.2.
 - Tab "Gambar" dan logo kustom belum masuk scope.
 - PNG diekspor lewat share sheet, belum tersimpan langsung ke galeri.
 - Uji di HP belum dilakukan untuk versi React Native ini.
