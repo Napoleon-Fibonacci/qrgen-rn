@@ -389,6 +389,5 @@ const styles = StyleSheet.create({
   pillText: {
     fontFamily: type.buttonMini.fontFamily,
     fontSize: 12,
-    fontWeight: '600',
   },
 });

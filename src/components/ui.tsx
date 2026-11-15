@@ -388,7 +388,6 @@ const styles = StyleSheet.create({
   },
   segmentTextActive: {
     color: '#ffffff',
-    fontWeight: '600',
   },
   toast: {
     position: 'absolute',

@@ -64,29 +64,32 @@ export const border = {
 } as const;
 
 /**
- * Font web (Chakra Petch, Atkinson Hyperlegible) masih woff2 dan belum bisa
- * dibaca React Native. Sampai TTF terpasang, pakai font sistem dan jangan
- * mengaku memakai font COST. Lihat AGENTS.md bagian 7.2.
+ * Font COST. Berkas aslinya woff2 di `../qrgen/assets/fonts`, dikonversi ke TTF
+ * karena React Native tidak membaca woff2.
+ *
+ * Nama family harus sama persis dengan nama berkas di
+ * `android/app/src/main/assets/fonts` dan dengan `@font-face` di
+ * `web/index.html`. Bobot sudah menempel di berkasnya, jadi jangan tambah
+ * `fontWeight` pada gaya yang memakai family ini.
  */
 export const fonts = {
-  heading: 'sans-serif-medium',
-  headingFamily: 'sans-serif',
-  body: 'sans-serif',
+  heading: 'ChakraPetch-Bold',
+  headingMedium: 'ChakraPetch-SemiBold',
+  body: 'AtkinsonHyperlegible-Regular',
+  bodyBold: 'AtkinsonHyperlegible-Bold',
 } as const;
 
 export const type = {
   appTitle: {
-    fontFamily: fonts.headingFamily,
+    fontFamily: fonts.heading,
     fontSize: 21,
-    fontWeight: '700',
     letterSpacing: 0.4,
     textTransform: 'uppercase',
     color: colors.ink,
   },
   sectionTitle: {
-    fontFamily: fonts.headingFamily,
+    fontFamily: fonts.heading,
     fontSize: 15,
-    fontWeight: '700',
     letterSpacing: 0.75,
     textTransform: 'uppercase',
     color: colors.ink,
@@ -94,44 +97,37 @@ export const type = {
   tagline: {
     fontFamily: fonts.body,
     fontSize: 14,
-    fontWeight: '400',
     color: colors.inkSoft,
   },
   body: {
     fontFamily: fonts.body,
     fontSize: 16,
-    fontWeight: '400',
     lineHeight: 25,
     color: colors.ink,
   },
   label: {
-    fontFamily: fonts.body,
+    fontFamily: fonts.bodyBold,
     fontSize: 14.5,
-    fontWeight: '700',
     color: colors.ink,
   },
   input: {
     fontFamily: fonts.body,
     fontSize: 15.5,
-    fontWeight: '400',
     color: colors.ink,
   },
   hint: {
     fontFamily: fonts.body,
     fontSize: 13,
-    fontWeight: '400',
     color: colors.inkSoft,
   },
   button: {
-    fontFamily: fonts.headingFamily,
+    fontFamily: fonts.headingMedium,
     fontSize: 14,
-    fontWeight: '600',
     color: '#ffffff',
   },
   buttonMini: {
-    fontFamily: fonts.headingFamily,
+    fontFamily: fonts.headingMedium,
     fontSize: 12.5,
-    fontWeight: '600',
     color: colors.ink,
   },
 } as const;
