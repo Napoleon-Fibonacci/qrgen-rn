@@ -57,7 +57,7 @@ react {
 /**
  * Set this to true to Run Proguard on Release builds to minify the Java bytecode.
  */
-def enableProguardInReleaseBuilds = false
+def enableProguardInReleaseBuilds = true
 
 /**
  * The preferred build flavor of JavaScriptCore (JSC)
@@ -93,6 +93,16 @@ android {
             keyPassword 'android'
         }
     }
+    // APK terpisah per arsitektur CPU, plus satu APK universal.
+    // APK per arsitektur jauh lebih kecil dan tetap bisa dipasang langsung.
+    splits {
+        abi {
+            enable true
+            reset()
+            include "arm64-v8a", "armeabi-v7a"
+            universalApk true
+        }
+    }
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
@@ -102,7 +112,24 @@ android {
             // see https://reactnative.dev/docs/signed-apk-android.
             signingConfig signingConfigs.debug
             minifyEnabled enableProguardInReleaseBuilds
+            // Buang resource yang tidak dirujuk kode setelah R8 berjalan.
+            shrinkResources enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+        }
+    }
+    packagingOptions {
+        // Berkas metadata milik toolchain, tidak dipakai saat aplikasi berjalan.
+        resources {
+            excludes += [
+                "META-INF/*.kotlin_module",
+                "META-INF/*.version",
+                "META-INF/DEPENDENCIES",
+                "META-INF/LICENSE*",
+                "META-INF/NOTICE*",
+                "META-INF/AL2.0",
+                "META-INF/LGPL2.1",
+                "**/*.proto",
+            ]
         }
     }
 }
