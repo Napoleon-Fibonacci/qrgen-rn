@@ -25,9 +25,9 @@ export const colors = {
 
 /** Warna status hasil scan. Teks warna ini selalu didampingi label teks. */
 export const scanStatus = {
-  aman: { text: colors.blueDeep, background: 'rgba(26, 86, 176, 0.12)' },
-  waspada: { text: '#7a5c00', background: 'rgba(255, 210, 63, 0.45)' },
-  bahaya: { text: colors.danger, background: colors.dangerSoft },
+  aman: { text: colors.ink, background: colors.card, border: colors.rule },
+  waspada: { text: colors.ink, background: colors.signal, border: colors.signal },
+  bahaya: { text: '#ffffff', background: colors.danger, border: colors.danger },
 } as const;
 
 /** Skala spasi: 4, 6, 8, 10, 12, 14, 16, 20, 24, 28, 40. */
@@ -83,20 +83,21 @@ export const type = {
   appTitle: {
     fontFamily: fonts.heading,
     fontSize: 21,
-    letterSpacing: 0.4,
+    letterSpacing: 0.6,
     textTransform: 'uppercase',
     color: colors.ink,
   },
   sectionTitle: {
     fontFamily: fonts.heading,
     fontSize: 15,
-    letterSpacing: 0.75,
+    letterSpacing: 0.5,
     textTransform: 'uppercase',
     color: colors.ink,
   },
   tagline: {
     fontFamily: fonts.body,
-    fontSize: 14,
+    fontSize: 13,
+    lineHeight: 18,
     color: colors.inkSoft,
   },
   body: {
@@ -106,8 +107,8 @@ export const type = {
     color: colors.ink,
   },
   label: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 14.5,
+    fontFamily: fonts.body,
+    fontSize: 14,
     color: colors.ink,
   },
   input: {
@@ -121,13 +122,32 @@ export const type = {
     color: colors.inkSoft,
   },
   button: {
-    fontFamily: fonts.headingMedium,
+    fontFamily: fonts.heading,
     fontSize: 14,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
     color: '#ffffff',
   },
   buttonMini: {
-    fontFamily: fonts.headingMedium,
-    fontSize: 12.5,
+    fontFamily: fonts.heading,
+    fontSize: 12,
+    letterSpacing: 0.4,
+    textTransform: 'uppercase',
+    color: colors.ink,
+  },
+  pill: {
+    fontFamily: fonts.heading,
+    fontSize: 12,
+    letterSpacing: 0.4,
+    textTransform: 'uppercase',
+    color: colors.ink,
+  },
+  /** Pil kecil di kartu riwayat, 11 px seperti desain. */
+  pillSmall: {
+    fontFamily: fonts.heading,
+    fontSize: 11,
+    letterSpacing: 0.4,
+    textTransform: 'uppercase',
     color: colors.ink,
   },
 } as const;
@@ -152,8 +172,8 @@ export const minTouch = 44;
 /** Lebar layar >= 900 memakai dua kolom. */
 export const wideBreakpoint = 900;
 
-/** Ukuran preview QR: minimal 220, maksimal 320. */
-export const qrPreview = { min: 220, max: 320 } as const;
+/** Ukuran preview QR: mengikuti desain, maksimal 240. */
+export const qrPreview = { min: 200, max: 240 } as const;
 
 /** Resolusi PNG yang disimpan, minimal 1024 px. */
 export const qrExportSize = 1024;

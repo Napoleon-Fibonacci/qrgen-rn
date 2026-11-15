@@ -2,7 +2,8 @@
  * QrGenApp - tab "Buat" dan "Pindai".
  *
  * Navigasi masih pakai state biasa, belum react-navigation. Lihat AGENTS.md
- * bagian 6.
+ * bagian 6. Header bergaya pita penuh dengan strip biru di atas, mengikuti
+ * desain Sleek di `design/sleek/`.
  *
  * @format
  */
@@ -10,7 +11,6 @@
 import React, { useState } from 'react';
 import {
   Animated,
-  Pressable,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -21,10 +21,18 @@ import {
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import GenerateScreen from './src/screens/GenerateScreen';
 import ScanScreen from './src/screens/ScanScreen';
-import { useRise } from './src/components/ui';
-import { border, colors, minTouch, radius, shadow, space, type, wideBreakpoint } from './src/theme';
+import { Segmented, useRise } from './src/components/ui';
+import { border, colors, radius, space, type, wideBreakpoint } from './src/theme';
 
 export type Tab = 'generate' | 'scan';
+
+const NAV_OPTIONS: ReadonlyArray<{ value: Tab; label: string }> = [
+  { value: 'generate', label: 'Buat QR' },
+  { value: 'scan', label: 'Pindai' },
+];
+
+/** Lebar isi maksimal di layar besar supaya baris teks tidak melebar. */
+const CONTENT_MAX = 960;
 
 function App() {
   return (
@@ -41,14 +49,41 @@ function AppContent() {
   const [contentWidth, setContentWidth] = useState(0);
   const [tab, setTab] = useState<Tab>('generate');
   const rise = useRise();
-  // Breakpoint dihitung dari lebar isi, bukan lebar jendela. Di pratinjau web,
-  // isi dibatasi 460 px walau jendela browser jauh lebih lebar.
+  // Breakpoint dihitung dari lebar isi, bukan lebar jendela. Di pratinjau web, isi
+  // dibatasi CONTENT_MAX walau jendela browser jauh lebih lebar.
   const measuredWidth = contentWidth || windowWidth;
   const wide = measuredWidth >= wideBreakpoint;
   const gutter = windowWidth >= wideBreakpoint ? space.xxl : space.l;
 
   return (
-    <View style={[styles.screen, { paddingTop: insets.top }]}>
+    <View style={styles.screen}>
+      <View style={[styles.header, { paddingTop: insets.top }]}>
+        <View style={styles.headerStrip} />
+        <View style={styles.headerInner}>
+          <View style={styles.brandRow}>
+            <LogoMark />
+            <View style={styles.brandText}>
+              <Text style={type.appTitle} numberOfLines={1}>
+                COST QR Generator
+              </Text>
+              <Text style={type.tagline} numberOfLines={2}>
+                Buat dan pindai QR dalam satu alat.
+              </Text>
+            </View>
+          </View>
+          <View style={styles.headerRule} />
+          <View style={styles.nav}>
+            <Segmented
+              options={NAV_OPTIONS}
+              value={tab}
+              onChange={setTab}
+              accessibilityLabel="Pilih layar"
+              tone="paper"
+            />
+          </View>
+        </View>
+      </View>
+
       <ScrollView
         contentContainerStyle={[
           styles.scroll,
@@ -56,62 +91,34 @@ function AppContent() {
         ]}
         keyboardShouldPersistTaps="handled"
       >
-        <View
-          style={styles.content}
+        <Animated.View
+          style={[styles.content, rise]}
           onLayout={(event) => setContentWidth(Math.round(event.nativeEvent.layout.width))}
         >
-          <Animated.View style={[styles.brand, rise]}>
-            <View style={styles.brandStrip} />
-            <View style={styles.brandRow}>
-              <View style={styles.brandMark}>
-                <View style={styles.markSquare} />
-                <View style={[styles.markSquare, styles.markSquareRight]} />
-                <View style={[styles.markSquare, styles.markSquareBottom]} />
-              </View>
-              <View style={styles.brandText}>
-                <Text
-                  style={[type.appTitle, measuredWidth < 360 ? styles.appTitleNarrow : null]}
-                  numberOfLines={1}
-                >
-                  COST QR Generator
-                </Text>
-                <Text style={type.tagline}>
-                  Club of Science and Technology. Bikin QR buat link, WiFi, kontak, dan teks.
-                </Text>
-              </View>
-            </View>
-            <View style={styles.topnav}>
-              <NavButton label="Buat QR" active={tab === 'generate'} onPress={() => setTab('generate')} />
-              <NavButton label="Pindai" active={tab === 'scan'} onPress={() => setTab('scan')} />
-            </View>
-          </Animated.View>
-
           {tab === 'generate' ? (
             <GenerateScreen wide={wide} contentWidth={measuredWidth} />
           ) : (
-            <ScanScreen wide={wide} />
+            <ScanScreen wide={wide} onGoGenerate={() => setTab('generate')} />
           )}
-        </View>
+        </Animated.View>
       </ScrollView>
     </View>
   );
 }
 
-function NavButton({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+/** Tanda tiga kotak biru dan satu kotak cyan, seperti logo COST. */
+function LogoMark() {
   return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="tab"
-      accessibilityState={{ selected: active }}
-      android_ripple={{ color: 'rgba(26, 86, 176, 0.12)' }}
-      style={({ pressed }) => [
-        styles.navbtn,
-        active ? styles.navbtnActive : null,
-        pressed && !active ? styles.navbtnPressed : null,
-      ]}
-    >
-      <Text style={[styles.navbtnText, active ? styles.navbtnTextActive : null]}>{label}</Text>
-    </Pressable>
+    <View style={styles.logo} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+      <View style={styles.logoRow}>
+        <View style={styles.logoCell} />
+        <View style={styles.logoCell} />
+      </View>
+      <View style={styles.logoRow}>
+        <View style={styles.logoCell} />
+        <View style={[styles.logoCell, styles.logoCellAccent]} />
+      </View>
+    </View>
   );
 }
 
@@ -120,101 +127,69 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.paper,
   },
+  header: {
+    backgroundColor: colors.band,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.rule,
+  },
+  headerStrip: {
+    height: border.headerStrip,
+    backgroundColor: colors.blue,
+  },
+  headerInner: {
+    width: '100%',
+    maxWidth: CONTENT_MAX,
+    alignSelf: 'center',
+    paddingHorizontal: space.l,
+    paddingTop: space.l,
+    paddingBottom: space.l,
+  },
+  brandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.md,
+  },
+  logo: {
+    width: 32,
+    height: 32,
+    gap: 2,
+  },
+  logoRow: {
+    flex: 1,
+    flexDirection: 'row',
+    gap: 2,
+  },
+  logoCell: {
+    flex: 1,
+    borderRadius: 2,
+    backgroundColor: colors.blue,
+  },
+  logoCellAccent: {
+    backgroundColor: colors.cyan,
+  },
+  brandText: {
+    flex: 1,
+  },
+  headerRule: {
+    width: 56,
+    height: border.titleUnderline,
+    borderRadius: radius.pill,
+    backgroundColor: colors.signal,
+    marginTop: space.sm,
+  },
+  nav: {
+    marginTop: space.l,
+    width: '100%',
+    maxWidth: 420,
+  },
   scroll: {
     flexGrow: 1,
   },
   content: {
     width: '100%',
-  },
-  brand: {
-    marginTop: space.xl,
-    backgroundColor: colors.card,
-    borderWidth: border.line,
-    borderColor: colors.rule,
-    borderRadius: radius.card,
-    paddingHorizontal: space.xl,
-    paddingTop: space.xxl,
-    paddingBottom: space.l,
-    overflow: 'hidden',
-    ...shadow.card,
-  },
-  brandStrip: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: border.headerStrip,
-    backgroundColor: colors.blue,
-    borderTopLeftRadius: radius.card,
-    borderTopRightRadius: radius.card,
-  },
-  brandRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: space.ml,
-  },
-  brandMark: {
-    width: 46,
-    height: 46,
-    borderRadius: 9,
-    backgroundColor: colors.blue,
-    borderWidth: border.line,
-    borderColor: colors.ruleStrong,
-  },
-  markSquare: {
-    position: 'absolute',
-    top: 9,
-    left: 9,
-    width: 10,
-    height: 10,
-    borderRadius: 2,
-    backgroundColor: '#ffffff',
-  },
-  markSquareRight: {
-    left: 27,
-  },
-  markSquareBottom: {
-    top: 27,
-    left: 27,
-    width: 5,
-    height: 5,
-  },
-  brandText: {
-    flex: 1,
-  },
-  appTitleNarrow: {
-    fontSize: 16,
-  },
-  topnav: {
-    flexDirection: 'row',
-    gap: space.xs,
-    marginTop: space.l,
-    padding: space.xs,
-    backgroundColor: colors.band,
-    borderWidth: border.line,
-    borderColor: colors.rule,
-    borderRadius: radius.tabBar,
-    alignSelf: 'flex-start',
-  },
-  navbtn: {
-    minHeight: minTouch,
-    justifyContent: 'center',
-    paddingHorizontal: space.md,
-    borderRadius: radius.chip,
-  },
-  navbtnActive: {
-    backgroundColor: colors.blue,
-  },
-  navbtnPressed: {
-    backgroundColor: 'rgba(14, 28, 46, 0.06)',
-  },
-  navbtnText: {
-    ...type.buttonMini,
-    fontSize: 13,
-    color: colors.inkSoft,
-  },
-  navbtnTextActive: {
-    color: '#ffffff',
+    maxWidth: CONTENT_MAX,
+    alignSelf: 'center',
+    paddingTop: space.l,
   },
 });
 

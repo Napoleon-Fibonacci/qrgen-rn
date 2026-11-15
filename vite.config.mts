@@ -35,6 +35,7 @@ export default defineConfig({
       { find: /^react-native-camera-kit$/, replacement: stub('camera-kit.tsx') },
       { find: /^react-native-safe-area-context$/, replacement: stub('safe-area.tsx') },
       { find: /^react-native-qrcode-svg$/, replacement: stub('qr-code.tsx') },
+      { find: /^react-native-svg$/, replacement: stub('svg.tsx') },
       { find: /^react-native-share$/, replacement: stub('share.ts') },
       { find: /^@react-native-clipboard\/clipboard$/, replacement: stub('clipboard.ts') },
     ],

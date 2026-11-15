@@ -115,15 +115,20 @@ Konsekuensi praktis:
 
 ```
 index.js                 registrasi App
-App.tsx                  tab "Buat" / "Pindai", state tab
-src/theme.ts             token warna dan spasi
+App.tsx                  header pita, nav "Buat QR" / "Pindai", state tab
+src/theme.ts             token warna, spasi, radius, tipografi, bayangan
 src/qr.ts                builder payload murni + tipe
+src/safety.ts            pemeriksaan link hasil pindai
+src/components/ui.tsx    Field, Button, IconButton, Pill, Segmented, dialog, toast
+src/components/icons.tsx ikon Phosphor (SVG) untuk tombol dan status
 src/screens/GenerateScreen.tsx
 src/screens/ScanScreen.tsx
+design/sleek/            acuan desain (PNG + HTML) dari Sleek
 android/                 shell Gradle
 ```
 
-Belum ada folder `components/`. Tambah kalau ada komponen yang dipakai dua layar.
+`design/sleek/html/*.html` adalah markup acuan tampilan. Jangan mengubahnya; ubah
+komponen RN lalu bandingkan lewat pratinjau web.
 
 ### Alur generator
 
@@ -172,25 +177,27 @@ dan catat di sini.
 | `danger` | `#b3261e` | hapus, error |
 | `dangerSoft` | `#f9eceb` | latar tombol hapus |
 
-Warna status scan (dari `scan.css`):
+Warna status scan mengikuti desain Sleek (dulu dari `scan.css`):
 
-- aman: teks `blueDeep`, latar `rgba(26,86,176,0.12)`
-- waspada: teks `#7a5c00`, latar `rgba(255,210,63,0.45)`
-- bahaya: teks `danger`, latar `dangerSoft`
+- aman: teks `ink`, latar `card`, border `rule`
+- waspada: teks `ink`, latar `signal`, border `signal`
+- bahaya: teks `#ffffff`, latar `danger`, border `danger`
 
 ### 7.2 Tipografi
 
 | Peran | Font | Ukuran | Berat |
 |---|---|---|---|
-| Judul aplikasi | Chakra Petch | 21 | 700, uppercase, letterSpacing 0.4 |
-| Judul bagian | Chakra Petch | 15 | 700, uppercase, letterSpacing 0.75 |
-| Tagline | Atkinson Hyperlegible | 14 | 400 |
+| Judul aplikasi | Chakra Petch | 21 | 700, uppercase, letterSpacing 0.6 |
+| Judul bagian | Chakra Petch | 15 | 700, uppercase, letterSpacing 0.5 |
+| Tagline | Atkinson Hyperlegible | 13 | 400, lineHeight 18 |
 | Body | Atkinson Hyperlegible | 16 | 400, lineHeight 25 |
-| Label field | Atkinson Hyperlegible | 14.5 | 700 |
+| Label field | Atkinson Hyperlegible | 14 | 400 |
 | Isi input | Atkinson Hyperlegible | 15.5 | 400 |
 | Hint | Atkinson Hyperlegible | 13 | 400 |
-| Tombol | Chakra Petch | 14 | 600 |
-| Tombol mini | Chakra Petch | 12.5 | 600 |
+| Tombol | Chakra Petch | 14 | 700, uppercase, letterSpacing 0.5 |
+| Tombol mini | Chakra Petch | 12 | 700, uppercase, letterSpacing 0.4 |
+| Pil status | Chakra Petch | 12 | 700, uppercase, letterSpacing 0.4 |
+| Pil tipe riwayat | Chakra Petch | 11 | 700, uppercase, letterSpacing 0.4 |
 
 Catatan font: berkas asli di `../qrgen/assets/fonts/` berformat **woff2**, dan React
 Native tidak membacanya. Font sudah dikonversi ke TTF memakai fontTools lokal:
@@ -229,28 +236,31 @@ Jangan memakai font lain sebagai pengganti diam-diam.
 
 | Web | RN | Catatan |
 |---|---|---|
-| `.topbar` + `.brand` | `View` header | kartu `card`, border 1.5, radius 10, strip biru 6 di atas |
-| `.brand h1` | `Text` | Chakra Petch 21 uppercase |
-| `.tagline` | `Text` | 14, `inkSoft` |
-| `.topnav` / `.navbtn` | `Pressable` | segmented, aktif `blue` + teks putih |
-| `.tabs` / `.tab` | `View` + `Pressable` | `band`, radius 9, padding 4, aktif `blue` |
-| `.field label` | `Text` | 14.5 bold, margin bawah 6 |
-| `.field input` | `TextInput` | `card`, border 1.5 `ruleStrong`, radius 6, padding 10/12 |
+| `.topbar` + `.brand` | `View` header | pita `band` penuh, strip biru 6 di atas, border bawah 1 |
+| `.brand h1` | `Text` | Chakra Petch 21 uppercase, letterSpacing 0.6 |
+| `.tagline` | `Text` | 13/18, `inkSoft` |
+| logo 2x2 | `View` 32x32 | tiga kotak `blue`, satu kotak `cyan`, gap 2, radius 2 |
+| `.topnav` / `.navbtn` | `Segmented` | wadah `paper`, padding 4, radius 8; aktif `blue` + teks putih |
+| `.tabs` / `.tab` | `Segmented` compact | wadah `band`, teks 12, aktif `blue` |
+| `.field label` | `Text` | 14 regular, jarak 6 ke input |
+| `.field input` | `TextInput` | `card`, border 1.5 `rule`, radius 6, padding 10/12, min 44 |
 | fokus input | state `focused` | border `blue`, tebal tetap 1.5 |
-| `.hint` | `Text` | 13 `inkSoft`, margin atas 6 |
+| `.hint` | `Text` | 13 `inkSoft`, jarak 6 |
 | `.warn` | `Text` | latar `rgba(255,210,63,0.35)`, border 1, radius 7, padding 8/10 |
 | `.btn` | `Pressable` | radius 8, padding 11/12, min height 44 |
-| `.btn-primary` | `Pressable` | `blue`, teks putih, selebar kartu |
-| `.btn-danger` | `Pressable` | `dangerSoft`, teks `danger`, border transparan |
-| `.preview-card` | `View` | `card`, border 1.5, radius 10, padding 20 |
-| `.qr-stage` | `View` | kotak maksimal 320, rasio 1:1, latar putih |
+| `.btn-primary` | `Button` | `blue`, teks putih, selebar kartu |
+| `.btn-danger` | `Button` `dangerOutline` | latar `card`, teks `danger`, border `rule` |
+| dialog | `ConfirmDialog` | `card` di atas latar `rgba(14,28,46,0.45)`, judul + garis `signal` |
+| `.preview-card` | `View` | `card`, border 1.5, radius 10, padding 16, bayangan tipis |
+| `.qr-stage` | `View` | putih, border 1, radius 6, padding 16; QR maksimal 240 |
 | `.scan-hint` | `Text` | 13, rata tengah |
-| `.history` + `.hist-item` | `View` + `FlatList` | `band`, border 1.5, radius 10, padding 10 |
-| thumbnail 96 | `Image` | 96x96, radius 6, latar `card` |
+| riwayat | `View` per item | kartu `band`, border 1.5, radius 10, padding 12 |
+| thumbnail 64 | `View` + `QRCode` | kotak 64, border 1, radius 6, QR 56 `ink` di atas `card` |
+| pil tipe | `Pill` `primary` `mini` | 11 px, radius 999, teks putih |
 | `.toast` | `Animated.View` | `ink`, teks putih, radius 8, bawah 24, maksimal 90% lebar |
-| `.result-hero` | `View` | `card`, border atas 4 `blue`, radius 10, padding 16/18 |
-| `.result-row` | `Pressable` | border bawah 1 `rule`, padding 10/4 |
-| `.scan-frame` | 4 `View` sudut | border 3 `signal`, 28x28 |
+| kartu hasil scan | `View` | `band`, border 1.5, radius 10, padding 12, dua tombol sejajar |
+| pil status | `Pill` + ikon | aman `shieldCheck`, waspada `warning`, bahaya `warningOctagon` |
+| `.scan-frame` | 4 `View` sudut | border 4 `signal`, 40x40, jarak 16 dari tepi |
 
 ### 7.5 Gerak
 
@@ -258,24 +268,30 @@ Jangan memakai font lain sebagai pengganti diam-diam.
   `Easing.bezier(0.16, 1, 0.3, 1)`. Sekali saat mount.
 - QR muncul: scale 0.96→1 + opacity, 0.25s.
 - Tidak ada animasi saat mengetik, kecuali debounce 180ms sebelum render QR.
-- Scanline preview boleh dilewati di versi RN.
+- Scanline statis digambar saat kamera hidup; tidak beranimasi.
 - Hormati reduced motion: `AccessibilityInfo.isReduceMotionEnabled()`; kalau aktif,
   lewati semua animasi.
 
 ### 7.6 Layout responsif
 
 - Mobile-first, satu kolom. Form di atas, preview QR di bawahnya.
-- Lebar layar >= 900: dua kolom, form kiri dan preview kanan. Preview tidak perlu
-  sticky; React Native tidak punya `position: sticky` yang sama.
+- Breakpoint 900 diukur dari lebar isi (`onLayout`), bukan lebar jendela, karena
+  pratinjau web membatasi lebar isi.
+- Isi dibatasi 960 px dan header 960 px; nav di header dibatasi 420 px supaya
+  tombol tidak melebar di desktop.
+- Lebar isi >= 900: dua kolom, form kiri dan preview kanan selebar 340. Pemindai
+  juga dua kolom: bingkai kamera 300 di kiri, hasil di kanan. Riwayat tetap di
+  bawah selebar isi.
 - `useWindowDimensions()` untuk breakpoint, bukan media query.
 - Target sentuh minimal 44x44.
-- Layar sempit: judul 16 agar tetap satu baris.
 
 ### 7.7 Perbedaan per platform
 
 - **Android**: `android_ripple={{ color: 'rgba(26,86,176,0.12)' }}` pada `Pressable`;
-  bayangan pakai `elevation`; tombol back ditangani `BackHandler`; status bar
-  `backgroundColor: paper`, `barStyle: 'dark-content'`.
+  bayangan pakai `elevation`; tombol back ditangani `BackHandler`. Status bar
+  transparan (edge-to-edge); pita header digambar sampai tepi atas dan diberi
+  `paddingTop` sebesar inset atas. `backgroundColor` pada `StatusBar` sudah tidak
+  ada di tipe RN 0.88.
 - **iOS**: bayangan pakai `shadow*`; `KeyboardAvoidingView` wajib untuk form;
   safe area atas/bawah dari `react-native-safe-area-context`.
 - **Font**: TTF sudah ada di `android/app/src/main/assets/fonts`; iOS belum punya
@@ -350,10 +366,29 @@ END:VCARD
 
 ### QR
 
-- Ukuran preview mengikuti lebar layar, minimal 220, maksimal 320.
+- Ukuran preview mengikuti lebar kartu, minimal 200, maksimal 240.
+- Kotak pratinjau putih, border 1 `rule`, padding 16, radius 6. Saat belum ada isi,
+  kotak menampilkan ikon QR dan teks "Isi dulu formnya, QR muncul di sini."
 - Warna default `#111111`, latar putih.
 - Simpan PNG resolusi tinggi (minimal 1024 px) lewat `toDataURL()`.
 - Nama file: `qr-<tipe>-<slug>-<YYYY-MM-DD>.png`.
+
+### Riwayat
+
+- Kartu `band` berisi thumbnail QR 56 px, pil tipe warna `blue`, tanggal, isi
+  singkat satu baris, dan tombol hapus 44x44.
+- Menekan kartu memuat ulang isi QR ke form untuk tipe URL dan Teks; WiFi dan
+  Kontak hanya memberi pesan karena payload-nya belum dipecah balik.
+- "Hapus semua" memakai `ConfirmDialog`, bukan penghapusan langsung.
+- Saat kosong, tampil kartu ilustrasi "Belum ada QR" dengan bidang putus-putus.
+
+### Pemindai
+
+- Bingkai maksimal 300 px, latar `ink`, empat sudut `signal` 40x40, garis `cyan`
+  di tengah saat kamera hidup.
+- Tombol senter memakai `torchMode` kamera dan ditandai `signal` saat menyala.
+- Saat izin ditolak, tampil kartu "Izin kamera ditolak" dengan tombol Coba lagi,
+  Buat QR, dan tautan Buka pengaturan.
 
 ### Error correction
 
@@ -531,13 +566,15 @@ Catatan penting:
 | 15 Nov 2026 | Pratinjau web lewat `react-native-web` + Vite di folder `web/` | Live preview tanpa emulator; kamera di-stub, bukan bukti APK |
 | 15 Nov 2026 | Font COST dikonversi woff2 → TTF dengan fontTools lokal | RN tidak membaca woff2; tanpa unduhan baru |
 | 15 Nov 2026 | APK hanya 2 ABI, R8 + resource shrinking + ABI split | Buang x86/x86_64 yang hanya untuk emulator |
+| 15 Nov 2026 | Tampilan memakai desain Sleek di `design/sleek/` | State WiFi/Kontak/Teks dan dialog disusun manual dengan token yang sama |
 
 ---
 
 ## 16. Status
 
 Kode versi pertama sudah ditulis dan lolos `npm test` (30 tes), `npm run lint`,
-dan `npx tsc --noEmit` di mesin lokal. Belum satu pun diuji di APK.
+dan `npx tsc --noEmit` di mesin lokal. Tampilan sudah disamakan dengan desain
+Sleek dan diperiksa di pratinjau web. Belum satu pun diuji di APK.
 
 - [x] Scaffold React Native 0.88.1
 - [x] `npm install`
@@ -545,10 +582,12 @@ dan `npx tsc --noEmit` di mesin lokal. Belum satu pun diuji di APK.
 - [x] Font COST dalam bentuk TTF, terpasang di Android dan pratinjau web
 - [x] Dependency QR, share, storage, clipboard, kamera
 - [x] Builder payload murni + unit test (`src/qr.ts`)
-- [x] Layar generator (kode selesai, belum diuji di HP)
+- [x] Desain Sleek disimpan di `design/sleek/` (4 layar)
+- [x] Komponen bersama: tombol, field, segmented, pil, dialog, ikon
+- [x] Layar generator mengikuti desain (kode selesai, belum diuji di HP)
 - [x] Simpan/bagikan PNG (kode selesai, belum diuji di HP)
-- [x] Riwayat lokal (kode selesai, belum diuji di HP)
-- [x] Layar scanner (kode selesai, belum diuji di HP)
+- [x] Riwayat lokal dengan thumbnail dan konfirmasi hapus (kode selesai, belum diuji di HP)
+- [x] Layar scanner dengan senter dan kartu izin (kode selesai, belum diuji di HP)
 - [x] Workflow GitHub Actions (sudah jalan; build release sukses)
 - [x] Setelan ukuran APK: 2 ABI, R8, resource shrinking, ABI split (arm64 25 MB, v7a 19 MB, terukur di CI)
 - [ ] Uji di HP
